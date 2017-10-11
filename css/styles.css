@@ -1,3 +1,33 @@
-/** {
+* {
   border: 1px solid red;
-} */
+}
+
+.cust-h-middle {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cust-header-section {
+  margin: 10% 0;
+}
+
+.cust-header-font {
+  font-family: 'Bungee Outline', cursive;
+  font-size: 5em;
+}
+
+@media only screen and (max-width: 767px) {
+  .cust-header-section {
+    margin: auto;
+  }
+
+  .cust-h-middle {
+    display: inline-block;
+    margin: 0;
+  }
+
+  .cust-header-font {
+    font-size: 4em;
+  }
+}
