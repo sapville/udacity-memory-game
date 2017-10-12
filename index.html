@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="js/url.min.js"></script>
   <script src="js/lib.js"></script>
   <script src="js/app.js"></script>
   <script>$(main)</script>
@@ -24,13 +25,16 @@
       <div class="form-group cust-h-middle">
         <label class="control-label input-lg" for="dimension">Square's Dimension</label>
         <input id="dimension" name="size" type="number" class="form-control input-lg" min="1" max="16" required value="4">
-        <button type="button" class="btn btn-primary btn-lg">Let's start!</button>
+        <input class="hidden" type="text" name="do-reset" value="X">
+        <button type="submit" class="btn btn-primary btn-lg">Let's start!</button>
       </div>
     </form>
     <div id="app" class="row">
-      <div class="col-sm-12">
-        <button type="button" class="btn">Reset</button>
-      </div>
+      <form class="col-sm-12" action="index.html">
+        <button type="submit" class="btn">Reset</button>
+        <input class="hidden" type="text" name="do-reset" value="">
+        <input id="save-dimension" class="hidden" type="text" name="size">
+      </form>
     </div>
   </div>
   <script src="js/bootstrap.min.js"></script>
