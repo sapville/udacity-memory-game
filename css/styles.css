@@ -1,5 +1,5 @@
 * {
-  /*border: 1px solid red;*/
+  /* border: 1px solid red; */
 }
 
 .cust-h-middle {
@@ -17,14 +17,29 @@
   font-size: 5em;
 }
 
-@media only screen and (max-width: 767px) {
-  .cust-header-section {
-    margin: 5%, 0;
-  }
+.app-table {
+  margin-top: 3%;
+  margin-bottom: 3%;
+}
 
+td {
+  border: 1px solid black;
+  height: 50px;
+  font-size: 1.5em;
+  text-align: center;
+  vertical-align: middle;
+  width: 50px;
+}
+
+@media only screen and (max-width: 767px) {
   .cust-h-middle {
     display: inline-grid;
     margin: 0;
+  }
+
+  .app-table {
+    margin-top: 3%;
+    margin-bottom: 3%;
   }
 
   .cust-header-font {
