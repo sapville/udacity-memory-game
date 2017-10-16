@@ -8,9 +8,9 @@ function main() { //eslint-disable-line no-unused-vars
   app.setInitialLayout();
   if (app.isAppScreen()) {
     app.buildTable();
+    app.startGame();
   }
 }
-
 /**
  * const App - application controller
  *
@@ -19,8 +19,19 @@ function main() { //eslint-disable-line no-unused-vars
 const App = function() {
   this.dimension = $.url('?size');
   this.table = new Table(this.dimension);
+  this.timer = new Timer();
 };
 $.extend(App.prototype, {
+  startGame: function() {
+    $('#timer').on('timeUp', {context: this}, this.gameTime);
+    this.timer.start(5);
+  },
+  gameTime: function (event) {
+    if (event.type !== 'timeUp') {
+      return;
+    }
+    $('table').on('click', 'td', {context: event.data.context}, event.data.context.cellClickHandler);
+  },
   /**
    * setInitialLayout - diffirentiate the layout depending on whether the screen was reset
    *
@@ -63,6 +74,13 @@ $.extend(App.prototype, {
   buildTable: function() {
     this.table.fillIconPool();
     this.table.fillWithCells();
+  },
+  cellClickHandler: function (event) {
+    event.data.context.cellClick(this);
+  },
+  cellClick: function (target) {
+    console.log($(target).children().hasClass('glyphicon'));
+    console.log(this.table.size);
   }
 });
 
@@ -115,7 +133,6 @@ $.extend(Table.prototype, {
       });
     }
   },
-
   /**
    * addCell - create a cell of the table
    *
@@ -151,12 +168,6 @@ $.extend(Table.prototype, {
     $('td').css('height', $('td').css('width'));
   }
 });
-
-
-
-
-
-
 /**
  * const Cell - class managing a cell
  *
@@ -169,10 +180,46 @@ const Cell = function(x, y, icon) {
   this.x = x;
   this.y = y;
   this.icon = icon;
-  this.status = cellStatus.closed;
+  this.status = cellStatus.opened;
 };
-/*$.extend(Cell.prototype, {
-  getIcon: function() {
-    // console.log(this.status);
+const Timer = function() {
+};
+Timer.startTime;
+Timer.shiftTime;
+Timer.elapsedTime;
+Timer.interval;
+Timer.tickTock = function () {
+  const date = new Date();
+  Timer.elapsedTime = date.getTime() - Timer.startTime - Timer.shiftTime;
+  Timer.elapsedTime = Math.round(Timer.elapsedTime/1000) * 1000;
+  Timer.showTime(Timer.elapsedTime);
+  if (Timer.elapsedTime === 0) {
+    $('#timer').trigger('timeUp');
   }
-});*/
+},
+Timer.showTime = function(time) {
+  function addAZero(val) {
+    return val < 10 ? '0' + val : val;
+  }
+  const sign = time < 0 ? '-' : '';
+  time = Math.abs(time);
+  let hours = Math.floor(time / (3600 * 1000));
+  const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
+  const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
+
+  $('#timer').text(
+    `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`
+  );
+};
+$.extend(Timer.prototype, {
+  start: function(shift) {
+    if (shift === undefined) {
+      shift = 0;
+    }
+    const date = new Date();
+    Timer.shiftTime = shift * 1000;
+    Timer.startTime = date.getTime();
+    Timer.showTime(-Timer.shiftTime);
+    Timer.interval = setInterval(Timer.tickTock, 1000);
+  },
+});
