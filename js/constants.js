@@ -1,6 +1,15 @@
 const cellStatus = { //eslint-disable-line no-unused-vars
-  opened: 0,
-  closed: 1
+  closed: 'closed',
+  questioned: 'questioned',
+  opened: 'opened',
+  locked: 'locked'
+};
+
+const clickResult = { //eslint-disable-line no-unused-vars
+  mismatched: 'mismatched',
+  matched: 'matched',
+  quest: 'quest',
+  noEffect: 'no-effect'
 };
 
 const icons = [ //eslint-disable-line no-unused-vars

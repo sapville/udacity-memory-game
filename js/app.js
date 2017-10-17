@@ -1,5 +1,6 @@
 /*global
   cellStatus
+  clickResult
   icons
   iconNone
 */
@@ -11,6 +12,7 @@ function main() { //eslint-disable-line no-unused-vars
     app.startGame();
   }
 }
+
 /**
  * const App - application controller
  *
@@ -22,20 +24,36 @@ const App = function() {
   this.timer = new Timer();
 };
 $.extend(App.prototype, {
+
+  /**
+   * startGame - the beginning of the game including time shift needed to take in the picture
+   *
+   */
   startGame: function() {
-    $('#timer').on('timeUp', {context: this}, this.gameTime);
-    this.timer.start(5);
+    $('#timer').on('timeUp', { //pass the current instance to be able to work in a local context
+      context: this
+    }, this.gameTime);
+    this.timer.start(Math.floor(this.dimension / 2));
   },
-  gameTime: function (event) {
+
+  /**
+   * gameTime - the event handler called when time to take in the picture is over
+   *
+   * @param  {Event} event jQuery Event object
+   */
+  gameTime: function(event) {
     if (event.type !== 'timeUp') {
       return;
     }
-    $('table').on('click', 'td', {context: event.data.context}, event.data.context.cellClickHandler);
+    $('table').on('click', 'td', { //pass the current instance to be able to work in a local context
+      context: event.data.context
+    }, event.data.context.cellClickHandler);
+    event.data.context.table.closeAll();
   },
+
   /**
    * setInitialLayout - diffirentiate the layout depending on whether the screen was reset
    *
-   * @return {type}  no return
    */
   setInitialLayout: function() {
     if (this.isAppScreen()) { //launch the app
@@ -58,6 +76,7 @@ $.extend(App.prototype, {
       }
     }
   },
+
   /**
    * isAppScreen - does the screen contains the application?
    *
@@ -66,21 +85,20 @@ $.extend(App.prototype, {
   isAppScreen: function() {
     return $.url('?do-reset') === 'X';
   },
+
   /**
    * buildTable - create the table
    *
-   * @return {type}  no return
    */
   buildTable: function() {
     this.table.fillIconPool();
     this.table.fillWithCells();
   },
-  cellClickHandler: function (event) {
+  cellClickHandler: function(event) {
     event.data.context.cellClick(this);
   },
-  cellClick: function (target) {
-    console.log($(target).children().hasClass('glyphicon'));
-    console.log(this.table.size);
+  cellClick: function(target) {
+    this.table.flipCell(target);
   }
 });
 
@@ -94,17 +112,17 @@ const Table = function(size) {
   this.size = size;
   this.cells = [];
   this.iconPool = [];
-  this.iconCounter = 0;
+  this.iconCounter = 0; //a technical attribute for the access to the mebers of the cells array
 };
 $.extend(Table.prototype, {
+
   /**
    * fillIconPool - fill the array with icons to show inside cells
    *
-   * @return {type}  no return
    */
   fillIconPool: function() {
     const iconNum = Math.floor(Math.pow(this.size, 2) / 2); //number of needed icons
-    const iconsArranged = [];
+    const iconsArranged = []; //the content of the icon array arranged randomly
 
     icons.forEach(function(icon) {
       iconsArranged.push({
@@ -133,41 +151,82 @@ $.extend(Table.prototype, {
       });
     }
   },
+
   /**
    * addCell - create a cell of the table
    *
    * @param  {jQuery} parent the parent of the created cell
    * @param  {int} x      x-coordinate of the created cell
    * @param  {int} y      y-coordinate of the created cell
-   * @return {type}       no return
    */
   addCell: function(parent, x, y) {
     let icon;
     //if the number of cells is odd, put the 'dead' cell in the center
     icon = this.iconPool[this.iconCounter].icon;
-    const cell = new Cell(x, y, icon);
+    const cell = new Cell(x, y, icon, parent);
     this.cells.push(cell);
-    parent.append(
-      `<td><span class="glyphicon glyphicon-${icon}" aria-hidden="true"></span></td>`);
     this.iconCounter++;
   },
 
   /**
    * fillWithCells - fill the table with cells
    *
-   * @return {type}  no return
    */
   fillWithCells: function() {
     for (let y = 0; y < this.size; y++) {
       $('table').append('<tr>');
       for (let x = 0; x < this.size; x++) {
-        this.addCell($('tr:last'), x, y);
+        this.addCell($('tr:last'), String(x), String(y));
       }
     }
     //to make sure cells are square even if resized in case the screen is too small
     $('td').css('height', $('td').css('width'));
+  },
+
+  /**
+   * closeAll - close all the cells (hide the icons)
+   *
+   */
+  closeAll: function() {
+    this.cells.forEach(function(elem) {
+      elem.close();
+    });
+  },
+
+  /**
+   * flipCell - revert the state of a cell
+   *
+   * @param  {DOM element} cell the click target
+   * @return {Class}  const clickResult values
+   */
+  flipCell: function(cell) {
+    const x = $(cell).attr('x');
+    const y = $(cell).attr('y');
+    const foundCell = this.cells.find(function(elem) {
+      return (elem.x === x && elem.y === y);
+    });
+    if (foundCell.status === cellStatus.closed) {
+      const questionedCell = this.cells.find(function(elem) {
+        return elem.status === cellStatus.questioned;
+      });
+      if (questionedCell === undefined) { //nothing to pair yet
+        foundCell.open(cell, cellStatus.questioned);
+        return clickResult.quest;
+      } else if (foundCell.icon === questionedCell.icon) { //the paring cell matches
+        questionedCell.status = cellStatus.opened;
+        foundCell.open(cell, cellStatus.opened);
+        return clickResult.matched;
+      } else { //the attempt failed
+        foundCell.close(cell, cellStatus.closed);
+        questionedCell.close(undefined, cellStatus.closed);
+        return clickResult.mismatched;
+      }
+    } else {
+      return clickResult.noEffect;
+    }
   }
 });
+
 /**
  * const Cell - class managing a cell
  *
@@ -176,42 +235,115 @@ $.extend(Table.prototype, {
  * @param  {string} icon icon
  * @return {type}     the instance of the class
  */
-const Cell = function(x, y, icon) {
+const Cell = function(x, y, icon, parent) {
   this.x = x;
   this.y = y;
   this.icon = icon;
-  this.status = cellStatus.opened;
+  this.status = this.icon === iconNone ? cellStatus.locked : cellStatus.opened;
+  this.spanPattern =
+    `<span class="glyphicon glyphicon-${this.icon}" aria-hidden="true"></span>`;
+  parent.append(`<td x=${this.x} y=${this.y}>${this.spanPattern}</td>`);
 };
-const Timer = function() {
-};
+$.extend(Cell.prototype, {
+
+  /**
+   * close - close the cell (hide an icon)
+   *
+   * @param  {DOM element} cell the click target
+   * @param  {String} status const cellStatus values
+   */
+  close: function(cell, status) {
+    if (this.status === cellStatus.locked) {
+      return;
+    }
+    if (cell === undefined) {
+      $(`td[x=${this.x}][y=${this.y}]`).children('span').remove();
+    } else {
+      $(cell).children('span').remove();
+    }
+    if (status === undefined) {
+      this.status = cellStatus.closed;
+    } else {
+      this.status = status;
+    }
+  },
+
+  /**
+   * open - open the cell (show an icon)
+   *
+   * @param  {DOM element} cell the click target
+   */
+  open: function(cell, status) {
+    if (this.status === cellStatus.locked) {
+      return;
+    }
+    if (cell === undefined) {
+      $(`td[x=${this.x}][y=${this.y}]`).append(this.spanPattern);
+    } else {
+      $(cell).append(this.spanPattern);
+    }
+    if (status === undefined) {
+      this.status = cellStatus.opened;
+    } else {
+      this.status = status;
+    }
+  },
+});
+
+/**
+ * const Timer - the object responsible for timing
+ *
+ * @return {type}  description
+ */
+const Timer = function() {};
+/**
+ * the following attributes belong to the function itself in order to enable their work with
+ * the global context of Window object which calls timer functions
+ */
 Timer.startTime;
 Timer.shiftTime;
 Timer.elapsedTime;
 Timer.interval;
-Timer.tickTock = function () {
-  const date = new Date();
-  Timer.elapsedTime = date.getTime() - Timer.startTime - Timer.shiftTime;
-  Timer.elapsedTime = Math.round(Timer.elapsedTime/1000) * 1000;
-  Timer.showTime(Timer.elapsedTime);
-  if (Timer.elapsedTime === 0) {
-    $('#timer').trigger('timeUp');
-  }
-},
-Timer.showTime = function(time) {
-  function addAZero(val) {
-    return val < 10 ? '0' + val : val;
-  }
-  const sign = time < 0 ? '-' : '';
-  time = Math.abs(time);
-  let hours = Math.floor(time / (3600 * 1000));
-  const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
-  const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
 
-  $('#timer').text(
-    `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`
-  );
-};
+/**
+ * callback function called every second
+ */
+Timer.tickTock =
+  function() {
+    const date = new Date();
+    Timer.elapsedTime = date.getTime() - Timer.startTime - Timer.shiftTime;
+    Timer.elapsedTime = Math.round(Timer.elapsedTime / 1000) * 1000; //round the value to a whole second
+    Timer.showTime(Timer.elapsedTime);
+    if (Timer.elapsedTime === 0) {
+      $('#timer').trigger('timeUp'); //close all the cells and begin to respond to clicks
+    }
+  };
+
+/**
+ * Show Time!
+ */
+Timer.showTime =
+  function(time) {
+    function addAZero(val) {
+      return val < 10 ? '0' + val : val;
+    }
+    const sign = time < 0 ? '-' : '';
+    time = Math.abs(time);
+    let hours = Math.floor(time / (3600 * 1000));
+    const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
+    const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
+
+    $('#timer').text(
+      `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`
+    );
+  };
 $.extend(Timer.prototype, {
+
+  /**
+   * start - start the timer
+   *
+   * @param  {Integer} shift time in seconds needed to take in the picture
+   */
   start: function(shift) {
     if (shift === undefined) {
       shift = 0;
