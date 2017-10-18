@@ -23,6 +23,8 @@ const App = function() {
   this.table = new Table(this.dimension);
   this.timer = new Timer();
   this.moves = new Moves();
+  this.stars = new Stars();
+  this.mistakes = 0;
 };
 $.extend(App.prototype, {
 
@@ -102,6 +104,19 @@ $.extend(App.prototype, {
     const result = this.table.flipCell(target);
     if (result === clickResult.matched || result === clickResult.mismatched) {
       this.moves.increase();
+    }
+    if (result === clickResult.mismatched) {
+      this.mistakes++;
+    }
+    if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 1000 ||
+        this.mistakes > this.dimension) && this.stars.number === 3) {
+      this.stars.decrease();
+    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 2000 ||
+        this.mistakes > this.dimension * 2) && this.stars.number === 2) {
+      this.stars.decrease();
+    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 3000 ||
+        this.mistakes > this.dimension * 3) && this.stars.number === 1) {
+      this.stars.decrease();
     }
   }
 });
@@ -369,5 +384,19 @@ $.extend(Moves.prototype, {
   increase: function() {
     this.number++;
     $('#moves').text(this.text + this.number);
+  }
+});
+
+const Stars = function() {
+  this.number = 3;
+};
+$.extend(Stars.prototype, {
+  decrease: function() {
+    if (this.number < 1) {
+      return;
+    }
+    $(`#star${this.number}`).toggleClass('glyphicon-star');
+    $(`#star${this.number}`).toggleClass('glyphicon-star-empty');
+    this.number--;
   }
 });
