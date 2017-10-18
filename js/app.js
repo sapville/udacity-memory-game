@@ -22,6 +22,7 @@ const App = function() {
   this.dimension = $.url('?size');
   this.table = new Table(this.dimension);
   this.timer = new Timer();
+  this.moves = new Moves();
 };
 $.extend(App.prototype, {
 
@@ -98,7 +99,10 @@ $.extend(App.prototype, {
     event.data.context.cellClick(this);
   },
   cellClick: function(target) {
-    this.table.flipCell(target);
+    const result = this.table.flipCell(target);
+    if (result === clickResult.matched || result === clickResult.mismatched) {
+      this.moves.increase();
+    }
   }
 });
 
@@ -354,4 +358,16 @@ $.extend(Timer.prototype, {
     Timer.showTime(-Timer.shiftTime);
     Timer.interval = setInterval(Timer.tickTock, 1000);
   },
+});
+
+const Moves = function() {
+  this.number = -1;
+  this.text = 'Moves: ';
+  this.increase();
+};
+$.extend(Moves.prototype, {
+  increase: function() {
+    this.number++;
+    $('#moves').text(this.text + this.number);
+  }
 });
