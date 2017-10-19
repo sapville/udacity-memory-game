@@ -1,5 +1,9 @@
 * {
-  /* border: 1px solid red ; */
+  border: 1px solid red;
+}
+
+.cust-no-padding {
+  padding: 0;
 }
 
 .cust-h-middle {

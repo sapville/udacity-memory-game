@@ -8,8 +8,6 @@ function main() { //eslint-disable-line no-unused-vars
   const app = new App();
   app.setInitialLayout();
   if (app.isAppScreen()) {
-    $('#reset').click( app.clickReset);
-    $('#return').click(app.clickReturn);
     app.buildTable();
     app.startGame();
   }
@@ -27,6 +25,9 @@ const App = function() {
   this.moves = new Moves();
   this.stars = new Stars();
   this.mistakes = 0;
+  $('.reset-click').on('click', {context: this}, this.clickReset);
+  $('.return-click').click(this.clickReturn);
+
 };
 $.extend(App.prototype, {
 
@@ -40,7 +41,16 @@ $.extend(App.prototype, {
     }, this.gameTime);
     this.timer.start(Math.floor(this.dimension / 2));
   },
-
+  endGame: function () {
+    this.timer.stop();
+    $('#stars-earned').text(this.stars.number);
+    $('#game-time').text(Timer.shownTime);
+    $('#move-count').text(this.moves.number);
+    $('.modal').modal({
+      keyboard: true,
+      show: true
+    });
+  },
   /**
    * gameTime - the event handler called when time to take in the picture is over
    *
@@ -104,12 +114,13 @@ $.extend(App.prototype, {
   },
   cellClick: function(target) {
     const result = this.table.flipCell(target);
-    if (result === clickResult.matched || result === clickResult.mismatched) {
-      this.moves.increase();
-    }
     if (result === clickResult.mismatched) {
       this.mistakes++;
     }
+    if (result === clickResult.matched || result === clickResult.mismatched) {
+      this.moves.increase();
+    }
+
     if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 1000 ||
         this.mistakes > this.dimension) && this.stars.number === 3) {
       this.stars.decrease();
@@ -120,13 +131,20 @@ $.extend(App.prototype, {
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
+
+    if (!this.table.cells.find(function (cell) {
+      return cell.status === cellStatus.closed || cell.status === cellStatus.questioned;
+    })) {
+      this.endGame();
+    }
   },
 
-  clickReset: function () {
+  clickReset: function(event) {
+    $('#dimension').val(event.data.context.dimension);
     $('#entry-form').submit();
   },
 
-  clickReturn: function () {
+  clickReturn: function() {
     $('#restart-form').submit();
   }
 });
@@ -335,6 +353,7 @@ Timer.startTime;
 Timer.shiftTime;
 Timer.elapsedTime;
 Timer.interval;
+Timer.shownTime;
 
 /**
  * callback function called every second
@@ -364,9 +383,8 @@ Timer.showTime =
     const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
     const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
 
-    $('#timer').text(
-      `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`
-    );
+    Timer.shownTime = `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`;
+    $('#timer').text(Timer.shownTime);
   };
 $.extend(Timer.prototype, {
 
@@ -385,6 +403,9 @@ $.extend(Timer.prototype, {
     Timer.showTime(-Timer.shiftTime);
     Timer.interval = setInterval(Timer.tickTock, 1000);
   },
+  stop: function () {
+    clearInterval(Timer.interval);
+  }
 });
 
 const Moves = function() {

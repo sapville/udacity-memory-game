@@ -34,7 +34,7 @@
         <label class="control-label input-lg" for="dimension">Dimension</label>
         <input id="dimension" name="size" type="number" class="form-control input-lg" min="2" max="10" required value="4">
         <input class="hidden" type="text" name="do-reset" value="X">
-        <button type="submit" class="btn btn-primary btn-lg">Let's start!</button>
+        <button type="submit" class="btn btn-default btn-lg">Let's start!</button>
       </div>
     </form>
 
@@ -63,8 +63,8 @@
               <div class="dropdown">
                 <a href="#" class="dropdown-toggle" id="drop" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Restart<span class="caret"></span> </a>
                 <ul class="dropdown-menu" aria-labelledby="drop">
-                  <li><a id="reset" href="#" role="button"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Reset</a></li>
-                  <li><a id="return" href="#" role="button"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Return</a></li>
+                  <li><a href="#" role="button" class="reset-click"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Reset</a></li>
+                  <li><a href="#" role="button" class="return-click"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Return</a></li>
                 </ul>
               </div>
               <input class="hidden" type="text" name="do-reset" value="">
@@ -83,6 +83,44 @@
       </div>
     </section>
   </main>
+
+  <!-- Modal  -->
+
+  <div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h2 class="modal-title text-center">Congratulations!</h2>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-xs-12 text-center">
+              <p>You have won the game!</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-9 col-xs-offset-3 text-left cust-no-padding">
+              <p>You earned <span id="stars-earned"></span> stars</p>
+              <p>Your time: <span id="game-time"></span></p>
+              <p>Your move count: <span id="move-count"></span></p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="row">
+            <div class="col-sm-6">
+              <button type="button" class="reset-click btn-lg btn-default center-block">Reset</button>
+            </div>
+            <div class="col-sm-6">
+              <button type="button" class="return-click btn-lg btn-default center-block">Return</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/bootstrap.min.js"></script>
 </body>
 
