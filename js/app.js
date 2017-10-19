@@ -199,7 +199,9 @@ $.extend(Table.prototype, {
       }
     }
     //to make sure cells are square even if resized in case the screen is too small
-    $('td').css('height', $('td').css('width'));
+    const width = $('td').css('width');
+    $('td').css('height', width);
+    $('td').css('min-width', width);
   },
 
   /**

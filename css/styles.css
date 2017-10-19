@@ -13,8 +13,8 @@
 }
 
 .cust-header-font {
-  font-family: 'Bungee Outline', cursive;
-  font-size: 5em;
+  font-family: 'Bungee Shade', cursive;
+  font-size: 4em;
 }
 
 .app-table {
@@ -43,6 +43,10 @@ td {
   }
 
   .cust-header-font {
-    font-size: 4em;
+    font-size: 2em;
+  }
+
+  td {
+    font-size: 1.3em;
   }
 }
