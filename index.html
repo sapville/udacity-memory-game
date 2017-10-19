@@ -58,10 +58,18 @@
           <h4 id="timer"></h4>
         </div>
         <div class="col-sm-3 col-xs-6">
-          <form action="index.html">
-            <button type="submit">Reset</button>
-            <input class="hidden" type="text" name="do-reset" value="">
-            <input id="save-dimension" class="hidden" type="text" name="size">
+          <form id="restart-form" action="index.html">
+            <div class="btn-group">
+              <div class="dropdown">
+                <a href="#" class="dropdown-toggle" id="drop" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Restart<span class="caret"></span> </a>
+                <ul class="dropdown-menu" aria-labelledby="drop">
+                  <li><a id="reset" href="#" role="button"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> Reset</a></li>
+                  <li><a id="return" href="#" role="button"><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Return</a></li>
+                </ul>
+              </div>
+              <input class="hidden" type="text" name="do-reset" value="">
+              <input id="save-dimension" class="hidden" type="text" name="size">
+            </div>
           </form>
         </div>
       </div>

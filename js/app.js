@@ -8,6 +8,8 @@ function main() { //eslint-disable-line no-unused-vars
   const app = new App();
   app.setInitialLayout();
   if (app.isAppScreen()) {
+    $('#reset').click( app.clickReset);
+    $('#return').click(app.clickReturn);
     app.buildTable();
     app.startGame();
   }
@@ -118,6 +120,14 @@ $.extend(App.prototype, {
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
+  },
+
+  clickReset: function () {
+    $('#entry-form').submit();
+  },
+
+  clickReturn: function () {
+    $('#restart-form').submit();
   }
 });
 
