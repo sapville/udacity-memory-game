@@ -62,7 +62,7 @@ $.extend(App.prototype, {
     if (event.type !== 'timeUp') {
       return;
     }
-    $('table').on('click', 'td', { //pass the current instance to be able to work in a local context
+    $('table').on('mousedown', 'td', { //pass the current instance to be able to work in a local context
       context: event.data.context
     }, event.data.context.cellClickHandler);
     event.data.context.table.closeAll();
@@ -123,13 +123,13 @@ $.extend(App.prototype, {
       this.moves.increase();
     }
 
-    if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 1000 ||
+    if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 1000 ||
         this.mistakes > this.dimension) && this.stars.number === 3) {
       this.stars.decrease();
-    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 2000 ||
+    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 2000 ||
         this.mistakes > this.dimension * 2) && this.stars.number === 2) {
       this.stars.decrease();
-    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 2) * 3000 ||
+    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 3000 ||
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
