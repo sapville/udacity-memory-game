@@ -25,7 +25,9 @@ const App = function() {
   this.moves = new Moves();
   this.stars = new Stars();
   this.mistakes = 0;
-  $('.reset-click').on('click', {context: this}, this.clickReset);
+  $('.reset-click').on('click', {
+    context: this
+  }, this.clickReset);
   $('.return-click').click(this.clickReturn);
 
 };
@@ -41,7 +43,7 @@ $.extend(App.prototype, {
     }, this.gameTime);
     this.timer.start(Math.floor(this.dimension / 2));
   },
-  endGame: function () {
+  endGame: function() {
     this.timer.stop();
     $('#stars-earned').text(this.stars.number);
     $('#game-time').text(Timer.shownTime);
@@ -132,9 +134,10 @@ $.extend(App.prototype, {
       this.stars.decrease();
     }
 
-    if (!this.table.cells.find(function (cell) {
-      return cell.status === cellStatus.closed || cell.status === cellStatus.questioned;
-    })) {
+    function findCell(cell) {
+      return (cell.status === cellStatus.closed || cell.status === cellStatus.questioned);
+    }
+    if (!this.table.cells.find(findCell)) {
       this.endGame();
     }
   },
@@ -259,15 +262,16 @@ $.extend(Table.prototype, {
         return elem.status === cellStatus.questioned;
       });
       if (questionedCell === undefined) { //nothing to pair yet
-        foundCell.open(cell, cellStatus.questioned);
+        foundCell.open(cellStatus.questioned, cell);
         return clickResult.quest;
       } else if (foundCell.icon === questionedCell.icon) { //the paring cell matches
-        questionedCell.status = cellStatus.opened;
-        foundCell.open(cell, cellStatus.opened);
+        // questionedCell.status = cellStatus.opened;
+        foundCell.open(cellStatus.opened, cell);
+        questionedCell.open(cellStatus.opened);
         return clickResult.matched;
       } else { //the attempt failed
-        foundCell.close(cell, cellStatus.closed);
-        questionedCell.close(undefined, cellStatus.closed);
+        foundCell.close(cellStatus.closed, cell);
+        questionedCell.close(cellStatus.closed);
         return clickResult.mismatched;
       }
     } else {
@@ -285,13 +289,17 @@ $.extend(Table.prototype, {
  * @return {type}     the instance of the class
  */
 const Cell = function(x, y, icon, parent) {
+  let cssClass = 'cust-cell-questioned';
   this.x = x;
   this.y = y;
   this.icon = icon;
   this.status = this.icon === iconNone ? cellStatus.locked : cellStatus.opened;
+  if (this.status === cellStatus.locked) {
+    cssClass = 'cust-cell-middle';
+  }
   this.spanPattern =
     `<span class="glyphicon glyphicon-${this.icon}" aria-hidden="true"></span>`;
-  parent.append(`<td x=${this.x} y=${this.y}>${this.spanPattern}</td>`);
+  parent.append(`<td x=${this.x} y=${this.y} class="${cssClass}">${this.spanPattern}</td>`);
 };
 $.extend(Cell.prototype, {
 
@@ -301,20 +309,27 @@ $.extend(Cell.prototype, {
    * @param  {DOM element} cell the click target
    * @param  {String} status const cellStatus values
    */
-  close: function(cell, status) {
+  close: function(status, cell) {
+    let lCell;
+
     if (this.status === cellStatus.locked) {
       return;
     }
-    if (cell === undefined) {
-      $(`td[x=${this.x}][y=${this.y}]`).children('span').remove();
-    } else {
-      $(cell).children('span').remove();
-    }
+
     if (status === undefined) {
       this.status = cellStatus.closed;
     } else {
       this.status = status;
     }
+
+    if (cell === undefined) {
+      lCell = $(`td[x=${this.x}][y=${this.y}]`);
+    } else {
+      lCell = $(cell);
+    }
+    lCell.children('span').remove();
+    lCell.removeClass();
+    lCell.toggleClass('cust-cell-closed');
   },
 
   /**
@@ -322,19 +337,38 @@ $.extend(Cell.prototype, {
    *
    * @param  {DOM element} cell the click target
    */
-  open: function(cell, status) {
+  open: function(status, cell) {
+    let lCell;
+    let statusBefore;
+
     if (this.status === cellStatus.locked) {
       return;
     }
-    if (cell === undefined) {
-      $(`td[x=${this.x}][y=${this.y}]`).append(this.spanPattern);
-    } else {
-      $(cell).append(this.spanPattern);
-    }
+
+    statusBefore = this.status;
     if (status === undefined) {
       this.status = cellStatus.opened;
     } else {
       this.status = status;
+    }
+
+    if (cell === undefined) {
+      lCell = $(`td[x=${this.x}][y=${this.y}]`);
+    } else {
+      lCell = $(cell);
+    }
+
+    lCell.removeClass();
+    if (statusBefore !== cellStatus.questioned) {
+      lCell.append(this.spanPattern);
+    }
+    switch (this.status) {
+      case cellStatus.opened:
+        lCell.toggleClass('cust-cell-opened');
+        break;
+      case cellStatus.questioned:
+        lCell.toggleClass('cust-cell-questioned');
+        break;
     }
   },
 });
@@ -403,7 +437,7 @@ $.extend(Timer.prototype, {
     Timer.showTime(-Timer.shiftTime);
     Timer.interval = setInterval(Timer.tickTock, 1000);
   },
-  stop: function () {
+  stop: function() {
     clearInterval(Timer.interval);
   }
 });

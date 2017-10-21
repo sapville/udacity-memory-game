@@ -1,5 +1,5 @@
 * {
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }
 
 .cust-no-padding {
@@ -7,8 +7,8 @@
 }
 
 .cust-h-middle {
-  position: relative;
   left: 50%;
+  position: relative;
   transform: translateX(-50%);
 }
 
@@ -21,15 +21,47 @@
   font-size: 4em;
 }
 
-.app-table {
-  margin-top: 3%;
+.cust-app-table {
+  background-color: #b9b9b9;
+  border-collapse: separate;
+  border-radius: 5px;
+  border-spacing: 1px;
+  box-shadow: -10px 10px 20px -5px #999;
   margin-bottom: 3%;
+  margin-top: 3%;
+}
+
+.cust-cell-questioned {
+  border: 2px inset #ccc;
+  background-color: #999;
+  color: #fff;
+}
+
+.cust-cell-middle {
+  border: none;
+  background-color: #999;
+}
+
+.cust-cell-opened {
+  border: 2px inset #ccc;
+  background-color: #999;
+  color: #b9b9b9;
+}
+
+.cust-cell-closed {
+  border: 2px outset #ccc;
+  background-color: #fff;
+}
+
+a {
+  color: black;
 }
 
 td {
-  border: 1px solid black;
+  border-radius: 5px;
   height: 50px;
   font-size: 1.5em;
+  line-height: 0;
   text-align: center;
   vertical-align: middle;
   width: 50px;
@@ -41,9 +73,9 @@ td {
     margin: 0;
   }
 
-  .app-table {
-    margin-top: 3%;
+  .cust-app-table {
     margin-bottom: 3%;
+    margin-top: 3%;
   }
 
   .cust-header-font {
@@ -51,6 +83,6 @@ td {
   }
 
   td {
-    font-size: 1.3em;
+    font-size: 1.2em;
   }
 }
