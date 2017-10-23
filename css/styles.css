@@ -1,5 +1,21 @@
-* {
-  /* border: 1px solid red; */
+body {
+  font-family: Roboto, sans-serif;
+}
+
+a {
+  color: #616161;
+}
+
+td {
+  border-radius: 5px;
+  color: #b9b9b9;
+  height: 55px;
+  font-size: 1.5em;
+  line-height: 0;
+  text-align: center;
+  transition: 0.3s ease-in;
+  vertical-align: middle;
+  width: 55px;
 }
 
 .cust-font-color {
@@ -59,6 +75,12 @@
   background-color: #fff;
 }
 
+.cust-cell-hit {
+  border: 2px inset #ccc;
+  background-color: #999;
+  color: #999;
+}
+
 body {
   font-family: Roboto, sans-serif;
 }
@@ -74,7 +96,7 @@ td {
   font-size: 1.5em;
   line-height: 0;
   text-align: center;
-  transition: 0.3s linear;
+  transition: 0.3s ease-out;
   vertical-align: middle;
   width: 55px;
 }

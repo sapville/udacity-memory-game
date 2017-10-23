@@ -65,6 +65,7 @@ $.extend(App.prototype, {
     $('table').on('mousedown', 'td', { //pass the current instance to be able to work in a local context
       context: event.data.context
     }, event.data.context.cellClickHandler);
+
     event.data.context.table.closeAll();
   },
 
@@ -133,7 +134,7 @@ $.extend(App.prototype, {
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
-
+    // TODO Stopped commenting here
     function findCell(cell) {
       return (cell.status === cellStatus.closed || cell.status === cellStatus.questioned);
     }
@@ -265,12 +266,12 @@ $.extend(Table.prototype, {
         foundCell.open(cellStatus.questioned, cell);
         return clickResult.quest;
       } else if (foundCell.icon === questionedCell.icon) { //the paring cell matches
-        // questionedCell.status = cellStatus.opened;
         foundCell.open(cellStatus.opened, cell);
         questionedCell.open(cellStatus.opened);
         return clickResult.matched;
       } else { //the attempt failed
-        foundCell.close(cellStatus.closed, cell);
+        // foundCell.close(cellStatus.closed, cell);
+        foundCell.hit(cell);
         questionedCell.close(cellStatus.closed);
         return clickResult.mismatched;
       }
@@ -370,6 +371,13 @@ $.extend(Cell.prototype, {
         lCell.toggleClass('cust-cell-questioned');
         break;
     }
+  },
+  hit: function(cell) {
+    $(cell).removeClass();
+    $(cell).toggleClass('cust-cell-hit');
+    setTimeout(function (context) {
+      context.close();
+    }, 200, this);
   },
 });
 
