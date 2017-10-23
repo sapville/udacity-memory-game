@@ -4,6 +4,7 @@
   icons
   iconNone
 */
+
 function main() { //eslint-disable-line no-unused-vars
   const app = new App();
   app.setInitialLayout();
@@ -16,19 +17,22 @@ function main() { //eslint-disable-line no-unused-vars
 /**
  * const App - application controller
  *
- * @return {function}  the instance of the function
+ * @return {function}  the instance of the class
  */
 const App = function() {
+  /**
+   * the url parsing function is provided by github library websanova/js-url
+   */
   this.dimension = $.url('?size');
   this.table = new Table(this.dimension);
   this.timer = new Timer();
   this.moves = new Moves();
   this.stars = new Stars();
   this.mistakes = 0;
-  $('.reset-click').on('click', {
+  $('.reset-click').on('click', { //handle a click on Reset button
     context: this
   }, this.clickReset);
-  $('.return-click').click(this.clickReturn);
+  $('.return-click').click(this.clickReturn); //handle a click on Return button
 
 };
 $.extend(App.prototype, {
@@ -43,6 +47,11 @@ $.extend(App.prototype, {
     }, this.gameTime);
     this.timer.start(Math.floor(this.dimension / 2));
   },
+
+  /**
+   * endGame - the game is finished, show the results
+   *
+   */
   endGame: function() {
     this.timer.stop();
     $('#stars-earned').text(this.stars.number);
@@ -54,7 +63,7 @@ $.extend(App.prototype, {
     });
   },
   /**
-   * gameTime - the event handler called when time to take in the picture is over
+   * gameTime - the event handler called when the time to take in the picture is over
    *
    * @param  {Event} event jQuery Event object
    */
@@ -101,6 +110,9 @@ $.extend(App.prototype, {
    * @return {boolean}  true if the screen contains the application
    */
   isAppScreen: function() {
+    /**
+     * the url parsing function is provided by github library websanova/js-url
+     */
     return $.url('?do-reset') === 'X';
   },
 
@@ -112,18 +124,38 @@ $.extend(App.prototype, {
     this.table.fillIconPool();
     this.table.fillWithCells();
   },
+
+  /**
+   * cellClickHandler - the handler of the cell click event
+   *
+   * @param  {Event} event the instance of the event
+   */
   cellClickHandler: function(event) {
     event.data.context.cellClick(this);
   },
+
+  /**
+   * cellClick - what to do when a cell was clicked upon
+   *
+   * @param  {DOM object} target cell clicked upon
+   */
   cellClick: function(target) {
+    /**
+     * render a cell reaction to a click
+     */
     const result = this.table.flipCell(target);
+    /**
+     *  count moves
+     */
     if (result === clickResult.mismatched) {
       this.mistakes++;
     }
     if (result === clickResult.matched || result === clickResult.mismatched) {
       this.moves.increase();
     }
-
+    /**
+     * award stars
+     */
     if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 1000 ||
         this.mistakes > this.dimension) && this.stars.number === 3) {
       this.stars.decrease();
@@ -134,7 +166,9 @@ $.extend(App.prototype, {
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
-    // TODO Stopped commenting here
+    /**
+     * finish the game
+     */
     function findCell(cell) {
       return (cell.status === cellStatus.closed || cell.status === cellStatus.questioned);
     }
@@ -143,11 +177,21 @@ $.extend(App.prototype, {
     }
   },
 
+  /**
+   * clickReset - button Reset click event handler
+   *
+   * @param  {Event} event event object passed
+   */
   clickReset: function(event) {
     $('#dimension').val(event.data.context.dimension);
     $('#entry-form').submit();
   },
 
+  /**
+   * clickReturn - button Return click event handler
+   *
+   * @return {type}  description
+   */
   clickReturn: function() {
     $('#restart-form').submit();
   }
@@ -270,8 +314,7 @@ $.extend(Table.prototype, {
         questionedCell.open(cellStatus.opened);
         return clickResult.matched;
       } else { //the attempt failed
-        // foundCell.close(cellStatus.closed, cell);
-        foundCell.hit(cell);
+        foundCell.hit(cell); //special method needed to imitate the button bouncing up
         questionedCell.close(cellStatus.closed);
         return clickResult.mismatched;
       }
@@ -372,10 +415,17 @@ $.extend(Cell.prototype, {
         break;
     }
   },
+
+  /**
+   * hit - imitate pressing the button and it bouncing up
+   *
+   * @param  {DOM element} cell cell to process
+   */
   hit: function(cell) {
     $(cell).removeClass();
     $(cell).toggleClass('cust-cell-hit');
-    setTimeout(function (context) {
+    //use time delay insead of mouseup event in order to make it wokr on touch-screens
+    setTimeout(function(context) {
       context.close();
     }, 200, this);
   },
@@ -388,7 +438,7 @@ $.extend(Cell.prototype, {
  */
 const Timer = function() {};
 /**
- * the following attributes belong to the function itself in order to enable their work with
+ * the following attributes belong to the function itself in order to enable their interaction with
  * the global context of Window object which calls timer functions
  */
 Timer.startTime;
@@ -404,7 +454,7 @@ Timer.tickTock =
   function() {
     const date = new Date();
     Timer.elapsedTime = date.getTime() - Timer.startTime - Timer.shiftTime;
-    Timer.elapsedTime = Math.round(Timer.elapsedTime / 1000) * 1000; //round the value to a whole second
+    Timer.elapsedTime = Math.round(Timer.elapsedTime / 1000) * 1000; //round the value to whole seconds
     Timer.showTime(Timer.elapsedTime);
     if (Timer.elapsedTime === 0) {
       $('#timer').trigger('timeUp'); //close all the cells and begin to respond to clicks
@@ -445,32 +495,57 @@ $.extend(Timer.prototype, {
     Timer.showTime(-Timer.shiftTime);
     Timer.interval = setInterval(Timer.tickTock, 1000);
   },
+
+  /**
+   * stop - stop the timer
+   *
+   */
   stop: function() {
     clearInterval(Timer.interval);
   }
 });
 
+/**
+ * const Moves - class counting moves
+ *
+ */
 const Moves = function() {
   this.number = -1;
   this.text = 'Moves: ';
-  this.increase();
+  this.increase(); //the call is needed to show an initial value
 };
 $.extend(Moves.prototype, {
+
+  /**
+   * increase - increase the value and update it on the screen
+   *
+   * @return {type}  description
+   */
   increase: function() {
     this.number++;
     $('#moves').text(this.text + this.number);
   }
 });
 
+/**
+ * const Stars - class rendering the stars
+ *
+ */
 const Stars = function() {
   this.number = 3;
 };
 $.extend(Stars.prototype, {
+
+  /**
+   * decrease - the number of stars can only decrease
+   *
+   * @return {type}  description
+   */
   decrease: function() {
     if (this.number < 1) {
       return;
     }
-    $(`#star${this.number}`).toggleClass('glyphicon-star');
+    $(`#star${this.number}`).toggleClass('glyphicon-star'); //id of a star contains its number
     $(`#star${this.number}`).toggleClass('glyphicon-star-empty');
     this.number--;
   }
