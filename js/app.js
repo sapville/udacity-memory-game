@@ -54,6 +54,7 @@ $.extend(App.prototype, {
    */
   endGame: function() {
     this.timer.stop();
+    //TODO When 1 star is earned put in the congratulations text 'star' instead of 'stars'
     $('#stars-earned').text(this.stars.number);
     $('#game-time').text(this.timer.shownTime);
     $('#move-count').text(this.moves.number);
@@ -297,6 +298,9 @@ $.extend(Table.prototype, {
    * @return {Class}  const clickResult values
    */
   flipCell: function(cell) {
+    //TODO When a candidate to match opens show the icons of both tiles whether they match or not
+    // and then hide them if they mismatch
+    // Currently if a checked tile mismatches a player cannot see its icon
     const x = $(cell).attr('x');
     const y = $(cell).attr('y');
     const foundCell = this.cells.find(function(elem) {
@@ -425,6 +429,7 @@ $.extend(Cell.prototype, {
     $(cell).removeClass();
     $(cell).toggleClass('cust-cell-hit');
     //use time delay insead of mouseup event in order to make it wokr on touch-screens
+    // TODO consider using a transition delay via CSS insead of a timer delay
     setTimeout(function(context) {
       context.close();
     }, 200, this);

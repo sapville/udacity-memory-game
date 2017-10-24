@@ -27,3 +27,8 @@ The class renders a cell, keeps its status and provides methods to change its st
 The class is responsible for time and a timer. It starts the game via raising event `timeUp`, which is handled in `App` class.
 ### Classes `Moves` and `Stars`
 Simple classes utilizing the respective functions.
+
+# Further development
+- In method Cell.hit consider using a transition delay via CSS insead of a timer delay
+- When a candidate to match opens show the icons of both tiles whether they match or not and then hide them if they mismatch. Currently if a checked tile mismatches a player cannot see its icon
+- When 1 star is earned put in the congratulations text 'star' instead of 'stars'
