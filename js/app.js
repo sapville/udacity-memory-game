@@ -55,7 +55,7 @@ $.extend(App.prototype, {
   endGame: function() {
     this.timer.stop();
     $('#stars-earned').text(this.stars.number);
-    $('#game-time').text(Timer.shownTime);
+    $('#game-time').text(this.timer.shownTime);
     $('#move-count').text(this.moves.number);
     $('.modal').modal({
       keyboard: true,
@@ -156,13 +156,13 @@ $.extend(App.prototype, {
     /**
      * award stars
      */
-    if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 1000 ||
+    if ((this.timer.elapsedTime > Math.pow(this.dimension, 3) * 1000 ||
         this.mistakes > this.dimension) && this.stars.number === 3) {
       this.stars.decrease();
-    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 2000 ||
+    } else if ((this.timer.elapsedTime > Math.pow(this.dimension, 3) * 2000 ||
         this.mistakes > this.dimension * 2) && this.stars.number === 2) {
       this.stars.decrease();
-    } else if ((Timer.elapsedTime > Math.pow(this.dimension, 3) * 3000 ||
+    } else if ((this.timer.elapsedTime > Math.pow(this.dimension, 3) * 3000 ||
         this.mistakes > this.dimension * 3) && this.stars.number === 1) {
       this.stars.decrease();
     }
@@ -436,48 +436,14 @@ $.extend(Cell.prototype, {
  *
  * @return {type}  description
  */
-const Timer = function() {};
-/**
- * the following attributes belong to the function itself in order to enable their interaction with
- * the global context of Window object which calls timer functions
- */
-Timer.startTime;
-Timer.shiftTime;
-Timer.elapsedTime;
-Timer.interval;
-Timer.shownTime;
+const Timer = function() {
+  this.startTime;
+  this.shiftTime;
+  this.elapsedTime;
+  this.interval;
+  this.shownTime;
+};
 
-/**
- * callback function called every second
- */
-Timer.tickTock =
-  function() {
-    const date = new Date();
-    Timer.elapsedTime = date.getTime() - Timer.startTime - Timer.shiftTime;
-    Timer.elapsedTime = Math.round(Timer.elapsedTime / 1000) * 1000; //round the value to whole seconds
-    Timer.showTime(Timer.elapsedTime);
-    if (Timer.elapsedTime === 0) {
-      $('#timer').trigger('timeUp'); //close all the cells and begin to respond to clicks
-    }
-  };
-
-/**
- * Show Time!
- */
-Timer.showTime =
-  function(time) {
-    function addAZero(val) {
-      return val < 10 ? '0' + val : val;
-    }
-    const sign = time < 0 ? '-' : '';
-    time = Math.abs(time);
-    let hours = Math.floor(time / (3600 * 1000));
-    const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
-    const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
-
-    Timer.shownTime = `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`;
-    $('#timer').text(Timer.shownTime);
-  };
 $.extend(Timer.prototype, {
 
   /**
@@ -490,10 +456,42 @@ $.extend(Timer.prototype, {
       shift = 0;
     }
     const date = new Date();
-    Timer.shiftTime = shift * 1000;
-    Timer.startTime = date.getTime();
-    Timer.showTime(-Timer.shiftTime);
-    Timer.interval = setInterval(Timer.tickTock, 1000);
+    this.shiftTime = shift * 1000;
+    this.startTime = date.getTime();
+    this.showTime(-this.shiftTime);
+    this.interval = setInterval(function(context) {
+      context.tickTock();
+    }, 1000, this); //pass the context to the time funtion parameter
+  },
+
+  /**
+   * callback function called every second
+   */
+  tickTock: function() {
+    const date = new Date();
+    this.elapsedTime = date.getTime() - this.startTime - this.shiftTime;
+    this.elapsedTime = Math.round(this.elapsedTime / 1000) * 1000; //round the value to whole seconds
+    this.showTime(this.elapsedTime);
+    if (this.elapsedTime === 0) {
+      $('#timer').trigger('timeUp'); //close all the cells and begin to respond to clicks
+    }
+  },
+
+  /**
+   * Show Time!
+   */
+  showTime: function(time) {
+    function addAZero(val) {
+      return val < 10 ? '0' + val : val;
+    }
+    const sign = time < 0 ? '-' : '';
+    time = Math.abs(time);
+    let hours = Math.floor(time / (3600 * 1000));
+    const minutes = Math.floor((time - hours * 3600 * 1000) / 60 / 1000);
+    const seconds = Math.floor((time - hours * 3600 * 1000 - minutes * 60 * 1000) / 1000);
+
+    this.shownTime = `${sign} ${addAZero(hours)} : ${addAZero(minutes)} : ${addAZero(seconds)}`;
+    $('#timer').text(this.shownTime);
   },
 
   /**
@@ -501,7 +499,7 @@ $.extend(Timer.prototype, {
    *
    */
   stop: function() {
-    clearInterval(Timer.interval);
+    clearInterval(this.interval);
   }
 });
 
