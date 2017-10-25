@@ -300,6 +300,11 @@ $.extend(Table.prototype, {
   flipCell: function(cell) {
     const x = $(cell).attr('x');
     const y = $(cell).attr('y');
+    if (this.cells.findIndex(function (elem) { //do noting if something is blinking
+      return elem.status === cellStatus.blinking;
+    }) >= 0) {
+      return;
+    }
     const foundCell = this.cells.find(function(elem) {
       return (elem.x === x && elem.y === y);
     });
@@ -317,11 +322,10 @@ $.extend(Table.prototype, {
       } else { //the attempt failed
         foundCell.open(cellStatus.blinking, cell);
         questionedCell.open(cellStatus.blinking);
-        setTimeout(function () {
+        setTimeout(function () { //give a time to blink
           foundCell.close();
           questionedCell.close();
         }, 1000);
-        // questionedCell.close(cellStatus.closed);
         return clickResult.mismatched;
       }
     } else {
