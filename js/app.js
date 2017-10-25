@@ -298,9 +298,6 @@ $.extend(Table.prototype, {
    * @return {Class}  const clickResult values
    */
   flipCell: function(cell) {
-    //TODO When a candidate to match opens show the icons of both tiles whether they match or not
-    // and then hide them if they mismatch
-    // Currently if a checked tile mismatches a player cannot see its icon
     const x = $(cell).attr('x');
     const y = $(cell).attr('y');
     const foundCell = this.cells.find(function(elem) {
@@ -318,8 +315,13 @@ $.extend(Table.prototype, {
         questionedCell.open(cellStatus.opened);
         return clickResult.matched;
       } else { //the attempt failed
-        foundCell.hit(cell); //special method needed to imitate the button bouncing up
-        questionedCell.close(cellStatus.closed);
+        foundCell.open(cellStatus.blinking, cell);
+        questionedCell.open(cellStatus.blinking);
+        setTimeout(function () {
+          foundCell.close();
+          questionedCell.close();
+        }, 1000);
+        // questionedCell.close(cellStatus.closed);
         return clickResult.mismatched;
       }
     } else {
@@ -389,7 +391,7 @@ $.extend(Cell.prototype, {
     let lCell;
     let statusBefore;
 
-    if (this.status === cellStatus.locked) {
+    if (this.status === cellStatus.locked || this.status === cellStatus.blinking) {
       return;
     }
 
@@ -417,23 +419,11 @@ $.extend(Cell.prototype, {
       case cellStatus.questioned:
         lCell.toggleClass('cust-cell-questioned');
         break;
+      case cellStatus.blinking:
+        lCell.toggleClass('cust-cell-questioned cust-cell-blink');
+        break;
     }
-  },
-
-  /**
-   * hit - imitate pressing the button and it bouncing up
-   *
-   * @param  {DOM element} cell cell to process
-   */
-  hit: function(cell) {
-    $(cell).removeClass();
-    $(cell).toggleClass('cust-cell-hit');
-    //use time delay insead of mouseup event in order to make it wokr on touch-screens
-    // TODO consider using a transition delay via CSS insead of a timer delay
-    setTimeout(function(context) {
-      context.close();
-    }, 200, this);
-  },
+  }
 });
 
 /**

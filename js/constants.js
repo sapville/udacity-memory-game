@@ -2,7 +2,8 @@ const cellStatus = { //eslint-disable-line no-unused-vars
   closed: 'closed',
   questioned: 'questioned',
   opened: 'opened',
-  locked: 'locked'
+  locked: 'locked',
+  blinking: 'blinking'
 };
 
 const clickResult = { //eslint-disable-line no-unused-vars
