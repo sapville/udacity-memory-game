@@ -31,8 +31,8 @@ const App = function() {
   this.mistakes = 0;
   $('.reset-click').on('click', { //handle a click on Reset button
     context: this
-  }, this.clickReset);
-  $('.return-click').click(this.clickReturn); //handle a click on Return button
+  }, this.clickResetHandler);
+  $('.return-click').click(this.clickReturnHandler); //handle a click on Return button
 
 };
 
@@ -41,9 +41,12 @@ const App = function() {
  *
  */
 App.prototype.startGame = function() {
-  $('#timer').on('timeUp', { //pass the current instance to be able to work in a local context
-    context: this
-  }, this.gameTime);
+  $('#timer').on('timeUp',
+    () => {
+      $('table').on('mousedown', 'td', {context: this}, this.cellClickHandler);
+      this.table.closeAll();
+    });
+
   this.timer.start(Math.floor(this.dimension / 2));
 };
 
@@ -61,21 +64,6 @@ App.prototype.endGame = function() {
     keyboard: true,
     show: true
   });
-};
-/**
- * gameTime - the event handler called when the time to take in the picture is over
- *
- * @param  {Event} event jQuery Event object
- */
-App.prototype.gameTime = function(event) {
-  if (event.type !== 'timeUp') {
-    return;
-  }
-  $('table').on('mousedown', 'td', { //pass the current instance to be able to work with the local context
-    context: event.data.context
-  }, event.data.context.cellClickHandler);
-
-  event.data.context.table.closeAll();
 };
 
 /**
@@ -126,16 +114,6 @@ App.prototype.buildTable = function() {
 };
 
 /**
- * cellClickHandler - the handler of the cell click event
- *
- * @param  {Event} event the instance of the event
- */
-App.prototype.cellClickHandler = function(event) {
-  //TODO arrow function?
-  event.data.context.cellClick(this);
-};
-
-/**
  * cellClick - what to do when a cell was clicked upon
  *
  * @param  {DOM object} target cell clicked upon
@@ -170,30 +148,35 @@ App.prototype.cellClick = function(target) {
   /**
    * finish the game
    */
-  function findCell(cell) {
-    return (cell.status === cellStatus.closed || cell.status === cellStatus.questioned);
-  }
-  if (!this.table.cells.find(findCell)) {
+  if (!this.table.cells.find(cell => cell.status === cellStatus.closed || cell.status === cellStatus.questioned)) {
     this.endGame();
   }
 };
 
 /**
- * clickReset - button Reset click event handler
+ * function - the event handler is needed to pass click target object (this)
+ *
+ * @param  {Event} event the instsance of the event
+ */
+App.prototype.cellClickHandler = function (event) {
+  event.data.context.cellClick(this);
+};
+/**
+ * clickResetHandler - button Reset click event handler
  *
  * @param  {Event} event event object passed
  */
-App.prototype.clickReset = function(event) {
+App.prototype.clickResetHandler = function(event) {
   $('#dimension').val(event.data.context.dimension);
   $('#entry-form').submit();
 };
 
 /**
- * clickReturn - button Return click event handler
+ * clickReturnHandler - button Return click event handler
  *
  * @return {type}  description
  */
-App.prototype.clickReturn = function() {
+App.prototype.clickReturnHandler = function() {
   $('#restart-form').submit();
 };
 
@@ -224,9 +207,8 @@ Table.prototype.fillIconPool = function() {
       icon
     });
   });
-  iconsArranged.sort(function(a, b) { //jumble the global list of icons
-    return a.order - b.order;
-  });
+  iconsArranged.sort((a, b) => a.order - b.order); //jumble the global list of icons
+
   for (let i = 0; i < iconNum; i++) {
     for (let c = 0; c < 2; c++) { //duplicate the icon
       this.iconPool.push({
@@ -235,9 +217,7 @@ Table.prototype.fillIconPool = function() {
       });
     }
   }
-  this.iconPool.sort(function(a, b) { //jumble the list for the table
-    return a.order - b.order;
-  });
+  this.iconPool.sort((a, b) => a.order - b.order);  //jumble the list for the table
   if (this.size % 2 !== 0) {
     this.iconPool.splice(Math.floor(Math.pow(this.size, 2) / 2), 0, {
       order: null,
@@ -284,9 +264,7 @@ Table.prototype.fillWithCells = function() {
  *
  */
 Table.prototype.closeAll = function() {
-  this.cells.forEach(function(elem) {
-    elem.close();
-  });
+  this.cells.forEach(elem => elem.close());
 };
 
 /**
@@ -298,14 +276,12 @@ Table.prototype.closeAll = function() {
 Table.prototype.flipCell = function(cell) {
   const x = $(cell).attr('x');
   const y = $(cell).attr('y');
-  if (this.cells.findIndex(function(elem) { //do noting if something is blinking
-      return elem.status === cellStatus.blinking;
-    }) >= 0) {
+  //do noting if something is blinking
+  if (this.cells.findIndex(elem => elem.status === cellStatus.blinking) >= 0) {
     return;
   }
-  const foundCell = this.cells.find(function(elem) {
-    return (elem.x === x && elem.y === y);
-  });
+  const foundCell = this.cells.find(elem => elem.x === x && elem.y === y);
+
   if (foundCell.status === cellStatus.closed) {
     const questionedCell = this.cells.find(function(elem) {
       return elem.status === cellStatus.questioned;
@@ -451,9 +427,7 @@ Timer.prototype.start = function(shift) {
   this.shiftTime = shift * 1000;
   this.startTime = date.getTime();
   this.showTime(-this.shiftTime);
-  this.interval = setInterval(function(context) {
-    context.tickTock();
-  }, 1000, this); //pass the context to the time funtion parameter
+  this.interval = setInterval(() => this.tickTock(), 1000);
 };
 
 /**
