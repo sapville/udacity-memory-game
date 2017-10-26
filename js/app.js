@@ -43,7 +43,9 @@ const App = function() {
 App.prototype.startGame = function() {
   $('#timer').on('timeUp',
     () => {
-      $('table').on('mousedown', 'td', {context: this}, this.cellClickHandler);
+      $('table').on('mousedown', 'td', {
+        context: this
+      }, this.cellClickHandler);
       this.table.closeAll();
     });
 
@@ -80,7 +82,7 @@ App.prototype.setInitialLayout = function() {
       $('#entry-form').toggleClass('hidden');
     }
   } else { //show the initial screen
-    if (!(this.dimension === undefined)) {
+    if (this.dimension !== undefined) {
       $('#dimension').val(this.dimension);
     }
     if (!$('#app').hasClass('hidden')) { //hide app if visible
@@ -158,7 +160,7 @@ App.prototype.cellClick = function(target) {
  *
  * @param  {Event} event the instsance of the event
  */
-App.prototype.cellClickHandler = function (event) {
+App.prototype.cellClickHandler = function(event) {
   event.data.context.cellClick(this);
 };
 /**
@@ -217,7 +219,7 @@ Table.prototype.fillIconPool = function() {
       });
     }
   }
-  this.iconPool.sort((a, b) => a.order - b.order);  //jumble the list for the table
+  this.iconPool.sort((a, b) => a.order - b.order); //jumble the list for the table
   if (this.size % 2 !== 0) {
     this.iconPool.splice(Math.floor(Math.pow(this.size, 2) / 2), 0, {
       order: null,
@@ -286,7 +288,7 @@ Table.prototype.flipCell = function(cell) {
     const questionedCell = this.cells.find(function(elem) {
       return elem.status === cellStatus.questioned;
     });
-    if (questionedCell === undefined) { //nothing to pair yet
+    if (typeof questionedCell === 'undefined') { //nothing to pair yet
       foundCell.open(cellStatus.questioned, cell);
       return clickResult.quest;
     } else if (foundCell.icon === questionedCell.icon) { //the paring cell matches
@@ -335,20 +337,16 @@ const Cell = function(x, y, icon, parent) {
  * @param  {DOM element} cell the click target
  * @param  {String} status const cellStatus values
  */
-Cell.prototype.close = function(status, cell) {
+Cell.prototype.close = function(status = cellStatus.closed, cell) {
   let lCell;
 
   if (this.status === cellStatus.locked) {
     return;
   }
 
-  if (status === undefined) {
-    this.status = cellStatus.closed;
-  } else {
-    this.status = status;
-  }
+  this.status = status;
 
-  if (cell === undefined) {
+  if (typeof cell === 'undefined') {
     lCell = $(`td[x=${this.x}][y=${this.y}]`);
   } else {
     lCell = $(cell);
@@ -363,7 +361,7 @@ Cell.prototype.close = function(status, cell) {
  *
  * @param  {DOM element} cell the click target
  */
-Cell.prototype.open = function(status, cell) {
+Cell.prototype.open = function(status = cellStatus.opened, cell) {
   let lCell;
   let statusBefore;
 
@@ -372,13 +370,9 @@ Cell.prototype.open = function(status, cell) {
   }
 
   statusBefore = this.status;
-  if (status === undefined) {
-    this.status = cellStatus.opened;
-  } else {
-    this.status = status;
-  }
+  this.status = status;
 
-  if (cell === undefined) {
+  if (typeof cell === 'undefined') {
     lCell = $(`td[x=${this.x}][y=${this.y}]`);
   } else {
     lCell = $(cell);
@@ -419,10 +413,7 @@ const Timer = function() {
  *
  * @param  {Integer} shift time in seconds needed to take in the picture
  */
-Timer.prototype.start = function(shift) {
-  if (shift === undefined) {
-    shift = 0;
-  }
+Timer.prototype.start = function(shift = 0) {
   const date = new Date();
   this.shiftTime = shift * 1000;
   this.startTime = date.getTime();
