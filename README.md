@@ -1,6 +1,8 @@
 # Gameplay
 ## Description
 The goal of the game is opening all the tiles. There is a pair for each tile - one with the same icon on it. Clicking on a tile a player can reveal its icon. Clicking on another tile a player checks if the icons of this tile and a previously opened one match. If this is the case the both tiles open. Otherwise, they close.
+## Give it a try!
+You can play [here](http://www.sapville.com/memory-game/).
 ## Features
 - A player can choose the number of tiles hence the difficulty level.
 - Before the game begins a player will be given a chance to throw a look at opened tiles. The time to take the picture in depends on the number of tiles.
@@ -13,6 +15,7 @@ The goal of the game is opening all the tiles. There is a pair for each tile - o
 - jQuery, v3.2.1
 - Bootstrap, v3.37
 - [js-url](https://github.com/websanova/js-url) (url parsing)
+
 ## Structure
 The program consists of an entry point, function `main` and a set of classes: `App`, `Table`, `Cell`, `Timer`, `Moves`, `Stars`
 ### Function `main`
@@ -29,4 +32,9 @@ The class is responsible for time and a timer. It starts the game via raising ev
 Simple classes utilizing the respective functions.
 
 # Further development
+## Bugs
 - When 1 star is earned put in the congratulations text 'star' instead of 'stars'
+
+## Features
+- Add a description of the game on the initial screen
+- Show the best result
