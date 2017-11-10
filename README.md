@@ -2,7 +2,7 @@
 ## Description
 The goal of the game is opening all the tiles. There is a pair for each tile - one with the same icon on it. Clicking on a tile a player can reveal its icon. Clicking on another tile a player checks if the icons of this tile and a previously opened one match. If this is the case the both tiles open. Otherwise, they close.
 ## Give it a try!
-You can play [here](http://www.sapville.com/memory-game/).
+You can play [here](https://sapville.github.io/udacity-memory-game/).
 ## Features
 - A player can choose the number of tiles hence the difficulty level.
 - Before the game begins a player will be given a chance to throw a look at opened tiles. The time to take the picture in depends on the number of tiles.
