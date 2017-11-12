@@ -1,4 +1,5 @@
 .eslintrc.js
-config.json
-lupaProject.json
-.idea/
+.idea/*
+node_modules/*
+.stylelintrc
+package-lock.json
